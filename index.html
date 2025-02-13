@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Author tools</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #2d2b2b;
+            color: white;
+        }
+
+        header {
+            background-color: rgb(13, 13, 13);
+            padding: 20px;
+            width: 100%;
+            text-align: center;
+        }
+
+        input {
+            width: 300px;
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Author tools</h1>
+        <h2>Using this can get you banned. Please Be Carefully using this</h2>
+    </header>
+    <main>
+        <input type="text" id="webhookUrl" placeholder="Enter Webhook URL">
+        <input type="text" id="message" placeholder="Enter Message">
+        <input type="number" id="delay" placeholder="Delay (ms)" value="1000">
+        <button onclick="startSpam()">Start Spam</button>
+        <button onclick="stopSpam()">Stop Spam</button>
+        <button onclick="deleteWebhook()">Delete Webhook</button>
+        <p id="status">Status: Idle</p>
+    </main>
+
+    <script>
+        let spamInterval;
+
+        function startSpam() {
+            const webhookUrl = document.getElementById("webhookUrl").value;
+            const message = document.getElementById("message").value;
+            const delay = parseInt(document.getElementById("delay").value) || 1000;
+
+            if (!webhookUrl || !message) {
+                alert("Please enter both a webhook URL and a message.");
+                return;
+            }
+
+            document.getElementById("status").innerText = "Status: Spamming...";
+
+            spamInterval = setInterval(() => {
+                fetch(webhookUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ content: message })
+                }).then(response => {
+                    if (response.status === 204) {
+                        console.log("Message sent successfully.");
+                    } else {
+                        console.error("Failed to send message:", response.status);
+                    }
+                }).catch(error => {
+                    console.error("Error:", error);
+                });
+            }, delay);
+        }
+
+        function stopSpam() {
+            clearInterval(spamInterval);
+            document.getElementById("status").innerText = "Status: Stopped";
+        }
+
+        function deleteWebhook() {
+            const webhookUrl = document.getElementById("webhookUrl").value;
+
+            if (!webhookUrl) {
+                alert("Please enter a webhook URL.");
+                return;
+            }
+
+            fetch(webhookUrl, { method: "DELETE" })
+                .then(response => {
+                    if (response.status === 204) {
+                        document.getElementById("status").innerText = "Webhook Deleted Successfully";
+                        alert("Webhook deleted successfully!");
+                    } else {
+                        document.getElementById("status").innerText = "Failed to delete webhook";
+                        alert("Failed to delete webhook: " + response.status);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+        }
+    </script>
+</body>
+</html>
